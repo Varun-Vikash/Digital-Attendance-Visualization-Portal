@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, LogOut, ClipboardCheck, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, ClipboardCheck, User, Menu, X, Users } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface LayoutProps {
@@ -13,9 +13,16 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
   const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
+  // Dynamic Navigation Items based on Role
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'history', label: 'Attendance History', icon: ClipboardCheck },
+    { 
+      id: 'dashboard', 
+      label: user?.role === UserRole.TEACHER ? 'Class Management' : 'Dashboard', 
+      icon: user?.role === UserRole.TEACHER ? Users : LayoutDashboard 
+    },
+    // Only show History to Students and Admins (Teachers see it in dashboard)
+    ...(user?.role !== UserRole.TEACHER ? [{ id: 'history', label: 'Attendance History', icon: ClipboardCheck }] : []),
+    // Only show Mark to Students
     ...(user?.role === UserRole.STUDENT ? [{ id: 'mark', label: 'Mark Attendance', icon: User }] : []),
   ];
 
