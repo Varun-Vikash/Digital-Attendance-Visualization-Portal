@@ -5,7 +5,6 @@ import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import AttendanceList from './components/AttendanceList';
 import MarkAttendance from './components/MarkAttendance';
-import AIInsights from './components/AIInsights';
 import { fetchAttendance } from './services/mockBackend';
 import { AttendanceRecord, UserRole } from './types';
 import { Loader2 } from 'lucide-react';
@@ -21,7 +20,8 @@ const AppContent: React.FC = () => {
     if (user) {
       setDataLoading(true);
       try {
-        // If admin, show all (conceptually), but for this demo, just show user's or mock specific set
+        // If admin or teacher, show all records (by passing undefined)
+        // If student, pass user.id to filter
         const data = await fetchAttendance(user.role === UserRole.STUDENT ? user.id : undefined);
         setRecords(data);
       } catch (e) {
@@ -59,11 +59,15 @@ const AppContent: React.FC = () => {
       ) : (
         <>
             {activeTab === 'dashboard' && <Dashboard records={records} />}
-            {activeTab === 'history' && <AttendanceList records={records} />}
+            {activeTab === 'history' && (
+              <AttendanceList 
+                records={records} 
+                showStudentName={user?.role !== UserRole.STUDENT} 
+              />
+            )}
             {activeTab === 'mark' && user?.role === UserRole.STUDENT && (
                 <MarkAttendance user={user} onUpdate={loadData} />
             )}
-            {activeTab === 'insights' && <AIInsights records={records} />}
         </>
       )}
     </Layout>
