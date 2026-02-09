@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, LogOut, ClipboardCheck, User, Menu, X, Sparkles } from 'lucide-react';
+import { LayoutDashboard, LogOut, ClipboardCheck, User, Menu, X } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface LayoutProps {
@@ -17,7 +17,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'history', label: 'Attendance History', icon: ClipboardCheck },
     ...(user?.role === UserRole.STUDENT ? [{ id: 'mark', label: 'Mark Attendance', icon: User }] : []),
-    { id: 'insights', label: 'AI Insights', icon: Sparkles },
   ];
 
   return (
