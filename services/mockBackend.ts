@@ -1,6 +1,6 @@
 import { AttendanceRecord, AttendanceStatus, User, UserRole } from '../types';
 
-// Mock Data
+// Mock Users
 const MOCK_USERS: User[] = [
   {
     id: '1',
@@ -39,47 +39,29 @@ const MOCK_USERS: User[] = [
   }
 ];
 
-const generateMockAttendance = (): AttendanceRecord[] => {
-  const records: AttendanceRecord[] = [];
-  const subjects = ['Math', 'Science', 'History', 'Physics'];
-  const now = new Date();
-  
-  // Generate 30 days of history
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+const STORAGE_KEY = 'attendviz_db_v1';
 
-    // Skip weekends
-    if (date.getDay() === 0 || date.getDay() === 6) continue;
-
-    MOCK_USERS.forEach(user => {
-      if (user.role === UserRole.STUDENT) {
-        // Random status
-        const rand = Math.random();
-        let status = AttendanceStatus.PRESENT;
-        // Jane is absent more often for demo purposes
-        const absentProb = user.email === 'jane@student.edu' ? 0.25 : 0.1;
-        
-        if (rand < absentProb) status = AttendanceStatus.ABSENT;
-        else if (rand < absentProb + 0.1) status = AttendanceStatus.LATE;
-        
-        records.push({
-          id: `${user.id}-${dateStr}`,
-          userId: user.id,
-          userName: user.name,
-          date: dateStr,
-          status,
-          checkInTime: status !== AttendanceStatus.ABSENT ? '08:00 AM' : undefined,
-          subject: subjects[Math.floor(Math.random() * subjects.length)],
-        });
-      }
-    });
+// Load from "Database" (LocalStorage)
+const loadAttendance = (): AttendanceRecord[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    console.error("Failed to load from DB", e);
+    return [];
   }
-  return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
-let MOCK_ATTENDANCE = generateMockAttendance();
+// In-memory store initialized from DB
+let MOCK_ATTENDANCE: AttendanceRecord[] = loadAttendance();
+
+const saveToDb = () => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_ATTENDANCE));
+  } catch (e) {
+    console.error("Failed to save to DB", e);
+  }
+};
 
 export const mockLogin = async (email: string): Promise<{ user: User; token: string }> => {
   return new Promise((resolve, reject) => {
@@ -100,12 +82,14 @@ export const mockLogin = async (email: string): Promise<{ user: User; token: str
 export const fetchAttendance = async (userId?: string): Promise<AttendanceRecord[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Refresh from DB to ensure sync
+      MOCK_ATTENDANCE = loadAttendance();
       if (userId) {
         resolve(MOCK_ATTENDANCE.filter(r => r.userId === userId));
       } else {
         resolve(MOCK_ATTENDANCE);
       }
-    }, 500);
+    }, 400);
   });
 };
 
@@ -121,13 +105,44 @@ export const markAttendance = async (record: Omit<AttendanceRecord, 'id' | 'user
     return new Promise((resolve) => {
         setTimeout(() => {
             const user = MOCK_USERS.find(u => u.id === record.userId);
-            const newRecord: AttendanceRecord = {
+            
+            // Check if record exists for this day and user, if so, update it
+            const existingIndex = MOCK_ATTENDANCE.findIndex(
+              r => r.userId === record.userId && r.date === record.date
+            );
+
+            let newRecord: AttendanceRecord;
+
+            if (existingIndex >= 0) {
+              // Update existing
+              newRecord = {
+                ...MOCK_ATTENDANCE[existingIndex],
                 ...record,
-                id: `${record.userId}-${Date.now()}`,
                 userName: user?.name || 'Unknown',
-            };
-            MOCK_ATTENDANCE = [newRecord, ...MOCK_ATTENDANCE];
+              };
+              MOCK_ATTENDANCE[existingIndex] = newRecord;
+            } else {
+              // Create new
+              newRecord = {
+                ...record,
+                id: `${record.userId}-${record.date}-${Date.now()}`,
+                userName: user?.name || 'Unknown',
+              };
+              MOCK_ATTENDANCE = [newRecord, ...MOCK_ATTENDANCE];
+            }
+            
+            saveToDb();
             resolve(newRecord);
-        }, 500);
+        }, 300);
     });
-}
+};
+
+export const resetAllAttendance = async (): Promise<void> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      MOCK_ATTENDANCE = [];
+      saveToDb();
+      resolve();
+    }, 500);
+  });
+};
