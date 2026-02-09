@@ -3,16 +3,18 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
+import AdminDashboard from './components/AdminDashboard';
 import AttendanceList from './components/AttendanceList';
 import MarkAttendance from './components/MarkAttendance';
-import { fetchAttendance } from './services/mockBackend';
-import { AttendanceRecord, UserRole } from './types';
+import { fetchAttendance, fetchUsers } from './services/mockBackend';
+import { AttendanceRecord, UserRole, User } from './types';
 import { Loader2 } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
 
   // Load data when authenticated
@@ -20,10 +22,13 @@ const AppContent: React.FC = () => {
     if (user) {
       setDataLoading(true);
       try {
-        // If admin or teacher, show all records (by passing undefined)
-        // If student, pass user.id to filter
-        const data = await fetchAttendance(user.role === UserRole.STUDENT ? user.id : undefined);
-        setRecords(data);
+        const [attendanceData, usersData] = await Promise.all([
+            fetchAttendance(user.role === UserRole.STUDENT ? user.id : undefined),
+            user.role === UserRole.ADMIN ? fetchUsers() : Promise.resolve([])
+        ]);
+        
+        setRecords(attendanceData);
+        setUsers(usersData);
       } catch (e) {
         console.error("Failed to load records", e);
       } finally {
@@ -58,13 +63,21 @@ const AppContent: React.FC = () => {
         </div>
       ) : (
         <>
-            {activeTab === 'dashboard' && <Dashboard records={records} />}
+            {activeTab === 'dashboard' && (
+              user.role === UserRole.ADMIN ? (
+                <AdminDashboard records={records} users={users} />
+              ) : (
+                <Dashboard records={records} />
+              )
+            )}
+            
             {activeTab === 'history' && (
               <AttendanceList 
                 records={records} 
                 showStudentName={user?.role !== UserRole.STUDENT} 
               />
             )}
+            
             {activeTab === 'mark' && user?.role === UserRole.STUDENT && (
                 <MarkAttendance user={user} onUpdate={loadData} />
             )}
