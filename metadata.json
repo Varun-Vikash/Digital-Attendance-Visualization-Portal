@@ -1,5 +1,5 @@
 {
-  "name": "AttendViz AI",
-  "description": "A modern Digital Attendance Visualization Portal featuring AI-driven insights, interactive data visualization, and secure authentication simulation.",
+  "name": "AttendViz",
+  "description": "A modern Digital Attendance Visualization Portal featuring interactive data visualization and secure authentication simulation.",
   "requestFramePermissions": []
 }
