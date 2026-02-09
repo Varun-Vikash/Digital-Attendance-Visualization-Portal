@@ -30,6 +30,13 @@ const MOCK_USERS: User[] = [
     role: UserRole.STUDENT,
     avatar: 'https://picsum.photos/id/68/200/200',
   },
+  {
+    id: '5',
+    name: 'Mike Smith',
+    email: 'mike@student.edu',
+    role: UserRole.STUDENT,
+    avatar: 'https://picsum.photos/id/70/200/200',
+  }
 ];
 
 const generateMockAttendance = (): AttendanceRecord[] => {
@@ -99,6 +106,14 @@ export const fetchAttendance = async (userId?: string): Promise<AttendanceRecord
         resolve(MOCK_ATTENDANCE);
       }
     }, 500);
+  });
+};
+
+export const fetchUsers = async (): Promise<User[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(MOCK_USERS);
+    }, 400);
   });
 };
 
