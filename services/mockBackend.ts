@@ -23,6 +23,13 @@ const MOCK_USERS: User[] = [
     role: UserRole.TEACHER,
     avatar: 'https://picsum.photos/id/66/200/200',
   },
+  {
+    id: '4',
+    name: 'Jane Doe',
+    email: 'jane@student.edu',
+    role: UserRole.STUDENT,
+    avatar: 'https://picsum.photos/id/68/200/200',
+  },
 ];
 
 const generateMockAttendance = (): AttendanceRecord[] => {
@@ -44,8 +51,11 @@ const generateMockAttendance = (): AttendanceRecord[] => {
         // Random status
         const rand = Math.random();
         let status = AttendanceStatus.PRESENT;
-        if (rand < 0.1) status = AttendanceStatus.ABSENT;
-        else if (rand < 0.2) status = AttendanceStatus.LATE;
+        // Jane is absent more often for demo purposes
+        const absentProb = user.email === 'jane@student.edu' ? 0.25 : 0.1;
+        
+        if (rand < absentProb) status = AttendanceStatus.ABSENT;
+        else if (rand < absentProb + 0.1) status = AttendanceStatus.LATE;
         
         records.push({
           id: `${user.id}-${dateStr}`,
