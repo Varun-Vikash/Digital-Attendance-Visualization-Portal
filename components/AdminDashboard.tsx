@@ -4,18 +4,22 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-import { Users, Filter, Calendar, TrendingUp, AlertCircle, Lock, Copy } from 'lucide-react';
+import { Users, Filter, Calendar, TrendingUp, AlertCircle, Lock, Trash2 } from 'lucide-react';
+import AttendanceManagement from './AttendanceManagement';
+import { resetAllAttendance } from '../services/mockBackend';
 
 interface AdminDashboardProps {
   records: AttendanceRecord[];
   users: User[];
+  onDataChange: () => void;
 }
 
 const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981']; // Blue, Red, Amber, Green
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataChange }) => {
   const [subjectFilter, setSubjectFilter] = useState<string>('All');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [resetting, setResetting] = useState(false);
 
   // Get unique subjects for filter
   const subjects = useMemo(() => {
@@ -71,43 +75,63 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users }) => {
     }));
   }, [filteredRecords]);
 
+  const handleReset = async () => {
+    if (window.confirm('Are you sure you want to delete ALL attendance records? This cannot be undone.')) {
+      setResetting(true);
+      await resetAllAttendance();
+      onDataChange();
+      setResetting(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header & Filters */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Overview</h1>
-          <p className="text-slate-500">School-wide attendance analytics</p>
+          <p className="text-slate-500">School-wide attendance analytics & management</p>
         </div>
         
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <Filter size={18} className="text-slate-400" />
-            <select 
-              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value)}
+        <div className="flex flex-col md:flex-row gap-4">
+             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <Filter size={18} className="text-slate-400" />
+                <select 
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  value={subjectFilter}
+                  onChange={(e) => setSubjectFilter(e.target.value)}
+                >
+                  {subjects.map(s => <option key={s} value={s}>{s} Class</option>)}
+                </select>
+              </div>
+              <div className="h-6 w-px bg-slate-200 hidden md:block" />
+              <div className="flex items-center gap-2">
+                <Calendar size={18} className="text-slate-400" />
+                <input 
+                  type="date" 
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                />
+                <span className="text-slate-400">-</span>
+                <input 
+                  type="date" 
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                />
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleReset}
+              disabled={resetting}
+              className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-100 font-medium hover:bg-red-100 transition-colors flex items-center gap-2"
             >
-              {subjects.map(s => <option key={s} value={s}>{s} Class</option>)}
-            </select>
-          </div>
-          <div className="h-6 w-px bg-slate-200 hidden md:block" />
-          <div className="flex items-center gap-2">
-            <Calendar size={18} className="text-slate-400" />
-            <input 
-              type="date" 
-              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              value={dateRange.start}
-              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-            />
-            <span className="text-slate-400">-</span>
-            <input 
-              type="date" 
-              className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              value={dateRange.end}
-              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-            />
-          </div>
+              <Trash2 size={18} />
+              {resetting ? 'Resetting...' : 'Reset Database'}
+            </button>
         </div>
       </div>
 
@@ -147,30 +171,41 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users }) => {
         </div>
       </div>
 
+      {/* Management Section */}
+      <div className="mt-8">
+        <AttendanceManagement onUpdate={onDataChange} />
+      </div>
+
       {/* Visualizations */}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <h2 className="text-lg font-bold text-slate-900 mb-6">Attendance Distribution</h2>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={80}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
+            {pieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                    >
+                    {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend verticalAlign="bottom" height={36}/>
+                </PieChart>
+                </ResponsiveContainer>
+            ) : (
+                <div className="h-full flex items-center justify-center text-slate-400">
+                    No data available
+                </div>
+            )}
           </div>
         </div>
 
