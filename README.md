@@ -88,7 +88,7 @@ Before running this application, ensure you have the following installed:
    
    Create or edit the `.env.local` file in the root directory:
    ```env
-   API_KEY=your_gemini_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
    
    To obtain a Gemini API key:
@@ -208,7 +208,7 @@ The project uses Vite for fast development and optimized production builds. Conf
 Type checking and compilation settings are defined in `tsconfig.json`.
 
 ### Environment Variables
-- `API_KEY`: Google Gemini API key for AI features
+- `GEMINI_API_KEY`: Google Gemini API key for AI features (mapped to `API_KEY` in the application)
 
 ## 🌐 Browser Support
 
@@ -229,7 +229,7 @@ Contributions are welcome! Here's how you can help:
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is open source and available for educational and personal use.
 
 ## 👨‍💻 Author
 
