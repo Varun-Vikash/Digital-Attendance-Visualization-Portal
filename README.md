@@ -2,7 +2,6 @@
 
 A modern, intelligent attendance management and visualization system built with React, TypeScript, and AI-powered insights. This application provides comprehensive attendance tracking with role-based access control and interactive data visualizations.
 
-![Version](https://img.shields.io/badge/version-0.0.0-blue.svg)
 ![React](https://img.shields.io/badge/React-19.2.4-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178C6.svg)
 
@@ -61,65 +60,6 @@ A modern, intelligent attendance management and visualization system built with 
 ### Development Tools
 - **Vite Plugin React**: Fast refresh and optimized builds
 - **TypeScript ESNext**: Latest JavaScript features with type safety
-
-## 📋 Prerequisites
-
-Before running this application, ensure you have the following installed:
-
-- **Node.js** (v16.0 or higher recommended)
-- **npm** (comes with Node.js) or **yarn**
-- **Google Gemini API Key** (for AI features)
-
-## 🚀 Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Varun-Vikash/Digital-Attendance-Visualization-Portal.git
-   cd Digital-Attendance-Visualization-Portal
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables:**
-   
-   Create or edit the `.env.local` file in the root directory:
-   ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-   
-   To obtain a Gemini API key:
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Copy and paste it into your `.env.local` file
-
-## 🎮 Usage
-
-### Development Mode
-
-Start the development server with hot reload:
-
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:5173` (default Vite port).
-
-### Production Build
-
-Build the application for production:
-
-```bash
-npm run build
-```
-
-Preview the production build locally:
-
-```bash
-npm run preview
-```
 
 ### Demo Credentials
 
@@ -189,63 +129,7 @@ Digital-Attendance-Visualization-Portal/
 - Line charts for trend visualization
 - AI-generated personalized recommendations
 
-## 🤖 AI Features
-
-The application leverages Google's Gemini AI to provide:
-- Personalized attendance analysis
-- Pattern recognition in attendance behavior
-- Constructive feedback and recommendations
-- Encouraging messages for students
-- Teaching effectiveness insights for educators
-
-## 🔧 Configuration
-
-### Vite Configuration
-The project uses Vite for fast development and optimized production builds. Configuration can be modified in `vite.config.ts`.
-
-### TypeScript Configuration
-Type checking and compilation settings are defined in `tsconfig.json`.
-
-### Environment Variables
-- `GEMINI_API_KEY`: Google Gemini API key for AI features (mapped to `API_KEY` in the application)
-
-## 🌐 Browser Support
-
-- Chrome (recommended)
-- Firefox
-- Safari
-- Edge
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is open source and available for educational and personal use.
-
 ## 👨‍💻 Author
 
 **Varun Vikash**
 - GitHub: [@Varun-Vikash](https://github.com/Varun-Vikash)
-
-## 🙏 Acknowledgments
-
-- Google Gemini AI for intelligent insights
-- Recharts for beautiful data visualizations
-- The React and TypeScript communities
-- Lucide for the icon library
-
-## 📧 Support
-
-For support, email or create an issue in the repository.
-
----
-
-**Made with ❤️ using React, TypeScript, and AI**
