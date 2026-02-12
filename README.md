@@ -3,7 +3,6 @@
 A modern, intelligent attendance management and visualization system built with React, TypeScript, and AI-powered insights. This application provides comprehensive attendance tracking with role-based access control and interactive data visualizations.
 
 ![Version](https://img.shields.io/badge/version-0.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![React](https://img.shields.io/badge/React-19.2.4-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178C6.svg)
 
