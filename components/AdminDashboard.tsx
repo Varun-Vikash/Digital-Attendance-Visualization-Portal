@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { Users, Filter, Calendar, TrendingUp, AlertCircle, Lock, Trash2 } from 'lucide-react';
 import AttendanceManagement from './AttendanceManagement';
-import { resetAllAttendance } from '../services/mockBackend';
+import { resetAllAttendance } from '../services/api';
 
 interface AdminDashboardProps {
   records: AttendanceRecord[];

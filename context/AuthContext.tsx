@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
-import { mockLogin } from '../services/mockBackend';
+import { mockLogin } from '../services/api';
 
 interface AuthContextType extends AuthState {
-  login: (email: string) => Promise<void>;
+  login: (email: string, password?: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -33,10 +33,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string) => {
+  const login = async (email: string, password?: string) => {
     setIsLoading(true);
     try {
-      const { user, token } = await mockLogin(email);
+      const { user, token } = await mockLogin(email, password);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setAuth({

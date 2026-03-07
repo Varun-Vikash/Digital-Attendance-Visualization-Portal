@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, AttendanceRecord, AttendanceStatus, UserRole } from '../types';
-import { fetchUsers, markAttendance, fetchAttendance } from '../services/mockBackend';
+import { fetchUsers, markAttendance, fetchAttendance } from '../services/api';
 import { Calendar, Check, X, Clock, AlertCircle, Loader2 } from 'lucide-react';
 
 interface AttendanceManagementProps {

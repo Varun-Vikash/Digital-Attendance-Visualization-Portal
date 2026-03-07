@@ -7,7 +7,7 @@ import AdminDashboard from './components/AdminDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
 import AttendanceList from './components/AttendanceList';
 import MarkAttendance from './components/MarkAttendance';
-import { fetchAttendance, fetchUsers } from './services/mockBackend';
+import { fetchAttendance, fetchUsers } from './services/api';
 import { AttendanceRecord, UserRole, User } from './types';
 import { Loader2 } from 'lucide-react';
 

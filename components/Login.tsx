@@ -14,7 +14,7 @@ const Login: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await login(email);
+      await login(email, password);
     } catch (err) {
       setError('Invalid credentials. Try "john@student.edu" or "admin@school.edu"');
     } finally {

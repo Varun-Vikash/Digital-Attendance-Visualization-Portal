@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AttendanceStatus, User } from '../types';
-import { markAttendance } from '../services/mockBackend';
+import { markAttendance } from '../services/api';
 import { MapPin, CheckCircle, Loader2 } from 'lucide-react';
 
 interface MarkAttendanceProps {
