@@ -1,125 +1,92 @@
 # 📊 AttendViz - Digital Attendance Visualization Portal
 
-A modern attendance management and visualization system built with React and TypeScript. This application provides comprehensive attendance tracking with role-based access control and interactive data visualizations.
+A modern, full-stack attendance management and visualization system. This application provides comprehensive attendance tracking with role-based access control and interactive data visualizations.
 
 ![React](https://img.shields.io/badge/React-19.2.4-61DAFB.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178C6.svg)
+![Node.js](https://img.shields.io/badge/Node.js-20.x-339933.svg)
+![Express](https://img.shields.io/badge/Express-4.x-000000.svg)
+![SQLite](https://img.shields.io/badge/SQLite-3.x-003B57.svg)
+
+---
+
+## 📂 Project Structure
+
+The project is divided into two main parts: `frontend` and `backend`.
+
+```text
+/
+├── frontend/             # React application (UI/UX)
+│   ├── components/       # UI components (Dashboards, Lists, etc.)
+│   ├── context/          # Authentication context
+│   ├── services/         # API service for backend communication
+│   ├── App.tsx           # Main application routing
+│   └── index.tsx         # Entry point
+├── backend/              # Node.js Express server
+│   ├── db.js             # Database configuration
+│   ├── index.js          # Server routes and logic
+│   └── database.sqlite   # SQLite database file
+├── README.md             # Project overview (this file)
+└── explain.md            # Beginner-friendly guide to how it works
+```
+
+---
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
-- **Role-Based Authentication**: Support for Admin, Teacher, and Student roles with tailored dashboards
-- **Interactive Data Visualization**: Beautiful charts and graphs using Recharts library
-- **Real-time Attendance Tracking**: Mark and monitor attendance with multiple status types
-- **Comprehensive Statistics**: Detailed analytics on attendance patterns and trends
+- **Role-Based Authentication**: Support for Admin, Teacher, and Student roles with tailored dashboards.
+- **Interactive Data Visualization**: Beautiful charts and graphs using Recharts.
+- **Real-time Attendance Tracking**: Mark and monitor attendance with multiple status types.
+- **Comprehensive Statistics**: Detailed analytics on attendance patterns and trends.
 
-### 📈 Visualization Features
-- **Pie Charts**: Visual breakdown of attendance status distribution
-- **Bar Charts**: Comparative analysis of attendance records
-- **Line Charts**: Trend analysis over time periods
-- **Weekly Trends**: Track attendance patterns across weeks
+### 👥 Role-Specific Dashboards
+- **🔑 Admin**: Manage all users, monitor system-wide stats, and oversee attendance.
+- **👨‍🏫 Teacher**: Access class attendance data and student performance overviews.
+- **🎓 Student**: View personal attendance history, mark self-attendance, and track performance.
 
-### 👥 Role-Specific Features
+---
 
-#### 🔑 Admin Dashboard
-- View and manage all users in the system
-- Access comprehensive attendance records
-- Monitor system-wide attendance statistics
-- Manage attendance records for all students
+## 🛠️ Tech Stack
 
-#### 👨‍🏫 Teacher Dashboard
-- Access to class attendance data
-- Quick overview of student performance
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS, Recharts, Lucide Icons |
+| **Backend** | Node.js, Express |
+| **Database** | SQLite (File-based) |
+| **Auth** | JSON Web Token (JWT) |
 
-#### 🎓 Student Dashboard
-- Personal attendance history and statistics
-- Self-service attendance marking
-- Visual representation of attendance performance
-
-## 🛠️ Technologies Used
-
-### Frontend
-- **React 19.2.4**: Modern UI library
-- **TypeScript 5.8.2**: Type-safe development
-- **Vite 6.2.0**: Fast build tool
-- **Tailwind CSS**: Utility-first CSS framework
-- **Recharts**: Composable charting library
-- **Lucide React**: Modern icon library
-
-### Backend
-- **Node.js**: JavaScript runtime
-- **Express**: Fast, unopinionated web framework
-- **SQLite**: Lightweight, file-based database
-- **JSON Web Token (JWT)**: Secure authentication
+---
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
+### 1. Backend Setup
+```bash
+cd backend
+npm install
+npm run dev
+```
+The backend will run on `http://localhost:5000`.
 
-### Installation
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+The frontend will run on `http://localhost:3000` (or the port shown in your terminal).
 
-1. Install Frontend dependencies:
-   ```bash
-   npm install
-   ```
+---
 
-2. Install Backend dependencies:
-   ```bash
-   cd server
-   npm install
-   cd ..
-   ```
+## 🔐 Demo Credentials
 
-### Running the Application
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@school.edu` | `password` |
+| **Teacher** | `sarah@school.edu` | `password` |
+| **Student** | `john@student.edu` | `password` |
 
-1. Start the Backend server:
-   ```bash
-   cd server
-   npm run dev
-   ```
+---
 
-2. Start the Frontend development server:
-   ```bash
-   npm run dev
-   ```
-
-3. Open your browser and navigate to `http://localhost:3000`
-
-## 🔐 Credentials (Demo)
-
-| Role    | Email              | Password |
-|---------|-------------------|----------|
-| Admin   | admin@school.edu  | password |
-| Teacher | sarah@school.edu  | password |
-| Student | john@student.edu  | password |
-
-## 📁 Project Structure
-
-/home/varun/attend/
-├───App.tsx
-├───index.html
-├───index.tsx
-├───package.json
-├───README.md
-├───tsconfig.json
-├───types.ts
-├───vite.config.ts
-├───components/
-│   ├───AdminDashboard.tsx
-│   ├───AttendanceList.tsx
-│   ├───AttendanceManagement.tsx
-│   ├───Dashboard.tsx
-│   ├───Layout.tsx
-│   ├───Login.tsx
-│   ├───MarkAttendance.tsx
-│   └───TeacherDashboard.tsx
-├───context/
-│   └───AuthContext.tsx
-├───services/
-│   └───api.ts              # API service for backend communication
-└───server/
-    ├───db.js               # Database configuration
-    ├───index.js            # Express server entry point
-    └───package.json        # Backend dependencies
+## 📖 Learn More
+Check out [explain.md](./explain.md) for a detailed, beginner-friendly explanation of how the frontend and backend work together!
