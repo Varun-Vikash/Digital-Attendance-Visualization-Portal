@@ -14,7 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Database
-await initDb();
+initDb().then(() => {
+  console.log('Database initialized');
+});
 
 // --- Auth Endpoints ---
 
@@ -116,6 +118,10 @@ app.post('/api/reset', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default app;
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}

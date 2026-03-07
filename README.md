@@ -88,5 +88,29 @@ The frontend will run on `http://localhost:3000` (or the port shown in your term
 
 ---
 
+## 🚀 Deployment to Vercel
+
+This project is configured for easy deployment on **Vercel** via Git.
+
+### 1. Preparation
+The project already includes a `vercel.json` and has been updated to use relative API paths.
+
+### 2. Vercel Dashboard Setup
+1. Connect your GitHub/GitLab repository to Vercel.
+2. Ensure the **Root Directory** is set to the repository root (default).
+3. Vercel will automatically pick up the `vercel.json` configuration:
+   - **Build Command:** `cd frontend && npm install && npm run build`
+   - **Output Directory:** `frontend/dist`
+4. Add any necessary environment variables (e.g., `JWT_SECRET`) in the Vercel Dashboard.
+
+### ⚠️ Important: SQLite on Vercel
+Vercel's serverless functions use an ephemeral filesystem. **Changes to the SQLite database will be lost** after a function cold start or restart. 
+
+For production use with persistent data, it is recommended to:
+- Switch the database to **Vercel Postgres (Neon)** or **MongoDB Atlas**.
+- Update `backend/db.js` to use a persistent cloud database.
+
+---
+
 ## 📖 Learn More
 Check out [explain.md](./explain.md) for a detailed, beginner-friendly explanation of how the frontend and backend work together!

@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "backend/index.js": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "backend/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
+}

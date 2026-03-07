@@ -4,7 +4,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirname, 'database.sqlite');
+const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
+const dbPath = isVercel 
+  ? path.join('/tmp', 'database.sqlite')
+  : path.resolve(__dirname, 'database.sqlite');
 
 const db = new sqlite3.Database(dbPath);
 

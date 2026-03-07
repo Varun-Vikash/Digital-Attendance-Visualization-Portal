@@ -1,6 +1,6 @@
 import { AttendanceRecord, User, UserRole } from '../types';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 
 export const mockLogin = async (email: string, password?: string): Promise<{ user: User; token: string }> => {
   const response = await fetch(`${API_BASE_URL}/login`, {
