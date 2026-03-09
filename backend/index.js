@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import db, { initDb } from './db.js';
+import pool, { initDb } from './db.js';
 
 dotenv.config();
 
@@ -15,7 +15,7 @@ app.use(express.json());
 
 // Initialize Database
 initDb().then(() => {
-  console.log('Database initialized');
+  console.log('Database initialization check complete.');
 });
 
 // --- Auth Endpoints ---
@@ -24,7 +24,8 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   
   try {
-    const user = await db.getAsync('SELECT * FROM users WHERE email = ?', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
     
     if (user && user.password === password) { // Simple password check for now
       const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, { expiresIn: '1d' });
@@ -35,6 +36,7 @@ app.post('/api/login', async (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -43,9 +45,10 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await db.allAsync('SELECT id, name, email, role, avatar FROM users');
-    res.json(users);
+    const result = await pool.query('SELECT id, name, email, role, avatar FROM users');
+    res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -60,14 +63,15 @@ app.get('/api/attendance', async (req, res) => {
     let params = [];
     
     if (userId) {
-      query += ' WHERE userId = ?';
+      query += ' WHERE "userId" = $1';
       params.push(userId);
     }
     
     query += ' ORDER BY date DESC';
-    const records = await db.allAsync(query, params);
-    res.json(records);
+    const result = await pool.query(query, params);
+    res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -76,32 +80,34 @@ app.post('/api/attendance', async (req, res) => {
   const { userId, date, status, checkInTime, subject } = req.body;
   
   try {
-    const user = await db.getAsync('SELECT name FROM users WHERE id = ?', [userId]);
+    const userRes = await pool.query('SELECT name FROM users WHERE id = $1', [userId]);
+    const user = userRes.rows[0];
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     // Check if record exists for this day and user
-    const existing = await db.getAsync(
-      'SELECT id FROM attendance WHERE userId = ? AND date = ?', 
+    const existingRes = await pool.query(
+      'SELECT id FROM attendance WHERE "userId" = $1 AND date = $2', 
       [userId, date]
     );
+    const existing = existingRes.rows[0];
 
     if (existing) {
       // Update
-      await db.runAsync(
-        'UPDATE attendance SET status = ?, checkInTime = ?, subject = ? WHERE id = ?',
+      await pool.query(
+        'UPDATE attendance SET status = $1, "checkInTime" = $2, subject = $3 WHERE id = $4',
         [status, checkInTime, subject, existing.id]
       );
-      const updated = await db.getAsync('SELECT * FROM attendance WHERE id = ?', [existing.id]);
-      res.json(updated);
+      const updatedRes = await pool.query('SELECT * FROM attendance WHERE id = $1', [existing.id]);
+      res.json(updatedRes.rows[0]);
     } else {
       // Create
       const id = `${userId}-${date}-${Date.now()}`;
-      await db.runAsync(
-        'INSERT INTO attendance (id, userId, userName, date, status, checkInTime, subject) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      await pool.query(
+        'INSERT INTO attendance (id, "userId", "userName", date, status, "checkInTime", subject) VALUES ($1, $2, $3, $4, $5, $6, $7)',
         [id, userId, user.name, date, status, checkInTime, subject]
       );
-      const created = await db.getAsync('SELECT * FROM attendance WHERE id = ?', [id]);
-      res.json(created);
+      const createdRes = await pool.query('SELECT * FROM attendance WHERE id = $1', [id]);
+      res.json(createdRes.rows[0]);
     }
   } catch (err) {
     console.error(err);
@@ -111,9 +117,10 @@ app.post('/api/attendance', async (req, res) => {
 
 app.post('/api/reset', async (req, res) => {
   try {
-    await db.runAsync('DELETE FROM attendance');
+    await pool.query('DELETE FROM attendance');
     res.json({ message: 'Database reset successful' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Database error' });
   }
 });

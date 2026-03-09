@@ -1,21 +1,27 @@
 import React, { useMemo } from 'react';
 import { AttendanceRecord, AttendanceStatus } from '../types';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line
-} from 'recharts';
+  ArcElement,
+} from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
 import { UserCheck, XCircle, Clock, AlertCircle } from 'lucide-react';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 interface DashboardProps {
   records: AttendanceRecord[];
@@ -41,6 +47,17 @@ const Dashboard: React.FC<DashboardProps> = ({ records }) => {
     { name: 'Excused', value: stats.excused },
   ].filter(d => d.value > 0);
 
+  const pieChartData = {
+    labels: pieData.map(d => d.name),
+    datasets: [
+      {
+        data: pieData.map(d => d.value),
+        backgroundColor: pieData.map((_, index) => COLORS[index % COLORS.length]),
+        borderWidth: 0,
+      },
+    ],
+  };
+
   // Weekly Trend Data (Last 7 days recorded)
   const trendData = useMemo(() => {
     return [...records].reverse().slice(-7).map(r => ({
@@ -49,6 +66,22 @@ const Dashboard: React.FC<DashboardProps> = ({ records }) => {
         status: r.status
     }));
   }, [records]);
+
+  const barChartData = {
+    labels: trendData.map(d => d.date),
+    datasets: [
+      {
+        label: 'Score',
+        data: trendData.map(d => d.statusValue),
+        backgroundColor: trendData.map(entry => 
+          entry.status === 'PRESENT' ? '#22c55e' : 
+          entry.status === 'LATE' ? '#f59e0b' : 
+          '#ef4444'
+        ),
+        borderRadius: 4,
+      },
+    ],
+  };
 
   const StatCard = ({ title, value, icon: Icon, color, bg }: any) => (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
@@ -109,54 +142,32 @@ const Dashboard: React.FC<DashboardProps> = ({ records }) => {
         <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h2 className="text-lg font-bold text-slate-900 mb-6">Attendance Trend (Last 7 Days)</h2>
           <div className="h-64">
-             <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={trendData}>
-                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                 <YAxis hide />
-                 <Tooltip 
-                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                   cursor={{ fill: '#f1f5f9' }}
-                 />
-                 <Bar dataKey="statusValue" name="Score" radius={[4, 4, 0, 0]}>
-                   {trendData.map((entry, index) => (
-                     <Cell 
-                        key={`cell-${index}`} 
-                        fill={
-                            entry.status === 'PRESENT' ? '#22c55e' : 
-                            entry.status === 'LATE' ? '#f59e0b' : 
-                            '#ef4444'
-                        } 
-                     />
-                   ))}
-                 </Bar>
-               </BarChart>
-             </ResponsiveContainer>
+            <Bar 
+              data={barChartData}
+              options={{
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: { display: false, beginAtZero: true },
+                  x: { grid: { display: false }, border: { display: false } }
+                }
+              }}
+            />
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <h2 className="text-lg font-bold text-slate-900 mb-6">Distribution</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-64 flex justify-center">
+            <Pie 
+              data={pieChartData} 
+              options={{ 
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'bottom' }
+                }
+              }} 
+            />
           </div>
         </div>
       </div>

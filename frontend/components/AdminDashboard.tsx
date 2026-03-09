@@ -1,24 +1,52 @@
 import React, { useMemo, useState } from 'react';
 import { AttendanceRecord, AttendanceStatus, User, UserRole } from '../types';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
-} from 'recharts';
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
 import { Users, Filter, Calendar, TrendingUp, AlertCircle, Lock, Trash2 } from 'lucide-react';
 import AttendanceManagement from './AttendanceManagement';
 import { resetAllAttendance } from '../services/api';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 interface AdminDashboardProps {
   records: AttendanceRecord[];
   users: User[];
   onDataChange: () => void;
+  selectedDate: string;
+  onDateChange: (date: string) => void;
 }
 
 const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981']; // Blue, Red, Amber, Green
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataChange }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
+  records, 
+  users, 
+  onDataChange,
+  selectedDate,
+  onDateChange
+}) => {
   const [subjectFilter, setSubjectFilter] = useState<string>('All');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [dateRange, setDateRange] = useState({ 
+    start: new Date().toISOString().split('T')[0], 
+    end: new Date().toISOString().split('T')[0] 
+  });
   const [resetting, setResetting] = useState(false);
 
   // Get unique subjects for filter
@@ -58,6 +86,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataC
     { name: 'Excused', value: stats.excused },
   ].filter(d => d.value > 0);
 
+  const pieChartData = {
+    labels: pieData.map(d => d.name),
+    datasets: [
+      {
+        data: pieData.map(d => d.value),
+        backgroundColor: pieData.map((_, index) => COLORS[index % COLORS.length]),
+        borderWidth: 0,
+      },
+    ],
+  };
+
   const dayOfWeekData = useMemo(() => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const counts = [0, 0, 0, 0, 0, 0, 0];
@@ -74,6 +113,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataC
       count: counts[index + 1]
     }));
   }, [filteredRecords]);
+
+  const barChartData = {
+    labels: dayOfWeekData.map(d => d.day),
+    datasets: [
+      {
+        label: 'Incidents',
+        data: dayOfWeekData.map(d => d.count),
+        backgroundColor: '#ef4444',
+        borderRadius: 4,
+      },
+    ],
+  };
 
   const handleReset = async () => {
     if (window.confirm('Are you sure you want to delete ALL attendance records? This cannot be undone.')) {
@@ -173,7 +224,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataC
 
       {/* Management Section */}
       <div className="mt-8">
-        <AttendanceManagement onUpdate={onDataChange} />
+        <AttendanceManagement 
+          onUpdate={onDataChange} 
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          records={records}
+          students={users.filter(u => u.role === UserRole.STUDENT)}
+        />
       </div>
 
       {/* Visualizations */}
@@ -182,25 +239,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataC
           <h2 className="text-lg font-bold text-slate-900 mb-6">Attendance Distribution</h2>
           <div className="h-72">
             {pieData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                    <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={80}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                    >
-                    {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend verticalAlign="bottom" height={36}/>
-                </PieChart>
-                </ResponsiveContainer>
+                <Pie 
+                  data={pieChartData} 
+                  options={{ 
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { position: 'bottom' }
+                    }
+                  }} 
+                />
             ) : (
                 <div className="h-full flex items-center justify-center text-slate-400">
                     No data available
@@ -212,18 +259,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ records, users, onDataC
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <h2 className="text-lg font-bold text-slate-900 mb-6">Absence & Late Patterns (Mon-Fri)</h2>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dayOfWeekData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} allowDecimals={false} />
-                <Tooltip 
-                   cursor={{fill: '#f8fafc'}}
-                   contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
-                />
-                <Bar dataKey="count" name="Incidents" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Bar 
+              data={barChartData}
+              options={{
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: { beginAtZero: true, border: { display: false } },
+                  x: { grid: { display: false }, border: { display: false } }
+                }
+              }}
+            />
           </div>
         </div>
       </div>

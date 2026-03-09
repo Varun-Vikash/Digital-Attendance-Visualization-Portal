@@ -4,33 +4,52 @@ import { fetchUsers, markAttendance, fetchAttendance } from '../services/api';
 import { Calendar, Check, X, Clock, AlertCircle, Loader2 } from 'lucide-react';
 
 interface AttendanceManagementProps {
+  students?: User[];
+  records?: AttendanceRecord[];
   onUpdate?: () => void;
+  loading?: boolean;
+  selectedDate?: string;
+  onDateChange?: (date: string) => void;
 }
 
-const AttendanceManagement: React.FC<AttendanceManagementProps> = ({ onUpdate }) => {
-  const [students, setStudents] = useState<User[]>([]);
-  const [records, setRecords] = useState<AttendanceRecord[]>([]);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [loading, setLoading] = useState(false);
+const AttendanceManagement: React.FC<AttendanceManagementProps> = ({ 
+  students: propsStudents, 
+  records: propsRecords, 
+  onUpdate,
+  loading: propsLoading = false,
+  selectedDate,
+  onDateChange
+}) => {
+  const [internalStudents, setInternalStudents] = useState<User[]>([]);
+  const [internalRecords, setInternalRecords] = useState<AttendanceRecord[]>([]);
+  const [internalDate, setInternalDate] = useState(new Date().toISOString().split('T')[0]);
+  const [internalLoading, setInternalLoading] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
+  const students = propsStudents || internalStudents;
+  const records = propsRecords || internalRecords;
+  const loading = propsLoading || internalLoading;
+  const date = selectedDate || internalDate;
+
   const loadData = async () => {
-    setLoading(true);
+    if (propsStudents && propsRecords) return;
+    
+    setInternalLoading(true);
     try {
       const [usersData, attendanceData] = await Promise.all([
         fetchUsers(),
         fetchAttendance()
       ]);
-      setStudents(usersData.filter(u => u.role === UserRole.STUDENT));
-      setRecords(attendanceData);
+      setInternalStudents(usersData.filter(u => u.role === UserRole.STUDENT));
+      setInternalRecords(attendanceData);
     } finally {
-      setLoading(false);
+      setInternalLoading(false);
     }
   };
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [propsStudents, propsRecords]);
 
   const handleStatusChange = async (userId: string, status: AttendanceStatus) => {
     setProcessingId(userId);
@@ -42,10 +61,14 @@ const AttendanceManagement: React.FC<AttendanceManagementProps> = ({ onUpdate })
         checkInTime: status === AttendanceStatus.PRESENT ? '09:00 AM' : undefined,
         subject: 'Class Attendance' // Generic for teacher marking
       });
-      // Refresh local records to reflect change immediately without full reload
-      const updatedRecords = await fetchAttendance();
-      setRecords(updatedRecords);
-      if (onUpdate) onUpdate();
+      
+      if (onUpdate) {
+        onUpdate();
+      } else {
+        // Fallback for standalone use
+        const updatedRecords = await fetchAttendance();
+        setInternalRecords(updatedRecords);
+      }
     } catch (error) {
       console.error("Failed to mark attendance", error);
     } finally {
@@ -96,7 +119,7 @@ const AttendanceManagement: React.FC<AttendanceManagementProps> = ({ onUpdate })
           <input 
             type="date" 
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => onDateChange ? onDateChange(e.target.value) : setInternalDate(e.target.value)}
             className="bg-transparent border-none outline-none text-sm text-slate-700 font-medium"
           />
         </div>

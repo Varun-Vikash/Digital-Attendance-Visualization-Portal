@@ -17,6 +17,7 @@ const AppContent: React.FC = () => {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Load data when authenticated
   const loadData = async () => {
@@ -60,9 +61,9 @@ const AppContent: React.FC = () => {
   const renderDashboard = () => {
     switch (user.role) {
       case UserRole.ADMIN:
-        return <AdminDashboard records={records} users={users} onDataChange={loadData} />;
+        return <AdminDashboard records={records} users={users} onDataChange={loadData} selectedDate={selectedDate} onDateChange={setSelectedDate} />;
       case UserRole.TEACHER:
-        return <TeacherDashboard user={user} />;
+        return <TeacherDashboard user={user} records={records} users={users} onDataChange={loadData} selectedDate={selectedDate} onDateChange={setSelectedDate} />;
       default:
         return <Dashboard records={records} />;
     }
@@ -70,12 +71,18 @@ const AppContent: React.FC = () => {
 
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {dataLoading ? (
+      {dataLoading && records.length === 0 ? (
         <div className="h-full flex items-center justify-center">
             <Loader2 className="animate-spin text-blue-600" size={32} />
         </div>
       ) : (
-        <>
+        <div className="relative">
+            {dataLoading && (
+              <div className="absolute -top-6 right-0 flex items-center gap-2 text-xs text-slate-400 font-medium">
+                <Loader2 className="animate-spin" size={12} />
+                Updating...
+              </div>
+            )}
             {activeTab === 'dashboard' && renderDashboard()}
             
             {activeTab === 'history' && (
@@ -88,7 +95,7 @@ const AppContent: React.FC = () => {
             {activeTab === 'mark' && user?.role === UserRole.STUDENT && (
                 <MarkAttendance user={user} onUpdate={loadData} />
             )}
-        </>
+        </div>
       )}
     </Layout>
   );

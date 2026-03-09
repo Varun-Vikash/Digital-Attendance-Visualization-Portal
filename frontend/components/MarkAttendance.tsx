@@ -11,7 +11,7 @@ interface MarkAttendanceProps {
 const MarkAttendance: React.FC<MarkAttendanceProps> = ({ user, onUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [date] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   const handleMark = async () => {
     setLoading(true);
@@ -39,7 +39,7 @@ const MarkAttendance: React.FC<MarkAttendanceProps> = ({ user, onUpdate }) => {
           <CheckCircle size={32} />
         </div>
         <h2 className="text-xl font-bold text-green-800 mb-2">Checked In Successfully!</h2>
-        <p className="text-green-600">You have been marked present for today.</p>
+        <p className="text-green-600">You have been marked present for {date}.</p>
         <button 
           onClick={() => setSuccess(false)}
           className="mt-6 text-green-700 font-medium hover:underline"
@@ -52,9 +52,19 @@ const MarkAttendance: React.FC<MarkAttendanceProps> = ({ user, onUpdate }) => {
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
-       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Mark Attendance</h1>
-        <p className="text-slate-500">Self check-in for {date}</p>
+       <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Mark Attendance</h1>
+          <p className="text-slate-500">Self check-in for {date === new Date().toISOString().split('T')[0] ? 'Today' : date}</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center gap-2 shadow-sm">
+          <input 
+            type="date" 
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="text-sm font-medium text-slate-700 outline-none"
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
