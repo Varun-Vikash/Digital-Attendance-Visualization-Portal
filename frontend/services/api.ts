@@ -1,6 +1,6 @@
 import { AttendanceRecord, User, UserRole } from '../types';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://attendviz-backend.onrender.com/api';
 
 export const mockLogin = async (email: string, password?: string): Promise<{ user: User; token: string }> => {
   const response = await fetch(`${API_BASE_URL}/login`, {
